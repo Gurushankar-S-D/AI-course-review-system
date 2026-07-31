@@ -1,9 +1,10 @@
-package com.gurushankar.aicoursereview.service;
+package com.gurushankar.aicoursereview.service.impl;
 
 import com.gurushankar.aicoursereview.dto.CourseRequest;
 import com.gurushankar.aicoursereview.dto.CourseResponse;
 import com.gurushankar.aicoursereview.entity.Course;
 import com.gurushankar.aicoursereview.repository.CourseRepository;
+import com.gurushankar.aicoursereview.service.CourseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
