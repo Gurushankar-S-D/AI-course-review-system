@@ -10,4 +10,6 @@ public interface ReviewAnalysisRepository extends JpaRepository<ReviewAnalysis, 
 
     Optional<ReviewAnalysis> findByReview(Review review);
 
+    Optional<ReviewAnalysis> findByReviewReviewId(Long reviewId);
+
 }
