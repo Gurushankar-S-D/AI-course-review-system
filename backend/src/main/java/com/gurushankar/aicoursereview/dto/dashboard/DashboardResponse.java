@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,4 +20,10 @@ public class DashboardResponse {
     private String topRatedCourse;
 
     private long aiAnalysedReviews;
+
+    private List<CourseRatingResponse> topRatedCourses;
+
+    private List<CourseRatingResponse> courseRatings;
+
+    private List<RatingDistributionResponse> ratingDistribution;
 }

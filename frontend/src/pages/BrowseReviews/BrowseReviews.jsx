@@ -52,11 +52,21 @@ function BrowseReviews() {
         )
         .sort((a, b) => {
 
-            if (sortBy === "highest")
+            if (sortBy === "highest") {
                 return b.rating - a.rating;
+            }
 
-            if (sortBy === "lowest")
+            if (sortBy === "lowest") {
                 return a.rating - b.rating;
+            }
+
+            if (sortBy === "newest") {
+                return new Date(b.createdAt) - new Date(a.createdAt);
+            }
+
+            if (sortBy === "oldest") {
+                return new Date(a.createdAt) - new Date(b.createdAt);
+            }
 
             return 0;
 
@@ -125,6 +135,19 @@ function BrowseReviews() {
                                 </div>
                                 <div className="review-user">
                                     {review.username}
+                                </div>
+                                <div className="review-date">
+                                    🕒{" "}
+                                    {review.createdAt
+                                        ? new Date(review.createdAt).toLocaleString("en-IN", {
+                                            day: "2-digit",
+                                            month: "short",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                            hour12: true
+                                        })
+                                        : "Date unavailable"}
                                 </div>
                             </div>
 

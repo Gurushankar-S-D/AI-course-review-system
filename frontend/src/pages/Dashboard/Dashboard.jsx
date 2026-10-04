@@ -72,6 +72,22 @@ function Dashboard() {
         );
     };
 
+    const courseRatings = dashboard?.courseRatings ?? [];
+    const topRatedCourses = dashboard?.topRatedCourses ?? [];
+    const ratingDistribution = dashboard?.ratingDistribution ?? [];
+    const largestDistributionCount = Math.max(
+        ...ratingDistribution.map((item) => Number(item.count) || 0),
+        1
+    );
+
+    const getRatingLabel = (rating) => {
+        if (rating >= 4.5) return "Excellent";
+        if (rating >= 4) return "Very Good";
+        if (rating >= 3) return "Good";
+        if (rating >= 2) return "Needs improvement";
+        return "Needs more feedback";
+    };
+
     return (
         <Layout>
 
@@ -273,20 +289,30 @@ function Dashboard() {
                             </div>
 
                             <div className="chart-body">
-
-                                <div className="chart-placeholder">
-
-                                    <BarChart3 size={42} />
-
-                                    <strong>
-                                        Course Rating Analytics
-                                    </strong>
-
-                                    <span>
-                                        Your existing bar chart can be displayed here.
-                                    </span>
-
-                                </div>
+                                {courseRatings.length === 0 ? (
+                                    <div className="chart-placeholder">
+                                        <BarChart3 size={42} />
+                                        <strong>No course ratings yet</strong>
+                                        <span>Ratings will appear after students submit reviews.</span>
+                                    </div>
+                                ) : (
+                                    <div className="rating-bar-chart">
+                                        {courseRatings.map((course) => (
+                                            <div className="rating-bar-row" key={course.courseId}>
+                                                <span className="rating-bar-label" title={course.courseName}>
+                                                    {course.courseName}
+                                                </span>
+                                                <div className="rating-bar-track">
+                                                    <div
+                                                        className="rating-bar-fill"
+                                                        style={{ width: `${(Number(course.averageRating) / 5) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <strong>{Number(course.averageRating).toFixed(1)}</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                             </div>
 
@@ -316,20 +342,30 @@ function Dashboard() {
                             </div>
 
                             <div className="chart-body">
-
-                                <div className="chart-placeholder">
-
-                                    <Star size={42} />
-
-                                    <strong>
-                                        Rating Distribution
-                                    </strong>
-
-                                    <span>
-                                        Your existing doughnut chart can be displayed here.
-                                    </span>
-
-                                </div>
+                                {dashboard?.totalReviews === 0 ? (
+                                    <div className="chart-placeholder">
+                                        <Star size={42} />
+                                        <strong>No ratings yet</strong>
+                                        <span>Rating distribution will appear after reviews are submitted.</span>
+                                    </div>
+                                ) : (
+                                    <div className="distribution-chart">
+                                        {ratingDistribution.map((item) => (
+                                            <div className="distribution-row" key={item.rating}>
+                                                <span>{item.rating} ★</span>
+                                                <div className="distribution-track">
+                                                    <div
+                                                        className="distribution-fill"
+                                                        style={{
+                                                            width: `${((Number(item.count) || 0) / largestDistributionCount) * 100}%`
+                                                        }}
+                                                    />
+                                                </div>
+                                                <strong>{item.count}</strong>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
 
                             </div>
 
@@ -501,191 +537,38 @@ function Dashboard() {
 
 
                     <div className="courses-grid">
-
-                        {/* Java */}
-
-                        <div className="course-card">
-
-                            <div className="course-rank">
-                                #1
+                        {topRatedCourses.length === 0 ? (
+                            <div className="dashboard-empty-state">
+                                <BookOpen size={38} />
+                                <h3>No course ratings yet</h3>
+                                <p>Top-rated courses will appear once students submit reviews.</p>
                             </div>
-
-                            <div className="course-card-header">
-
-                                <div>
-
-                                    <h3>
-                                        Java Programming
-                                    </h3>
-
-                                    <p>
-                                        Core programming
-                                    </p>
-
+                        ) : (
+                            topRatedCourses.map((course, index) => (
+                                <div className="course-card" key={course.courseId}>
+                                    <div className="course-rank">#{index + 1}</div>
+                                    <div className="course-card-header">
+                                        <div>
+                                            <h3>{course.courseName}</h3>
+                                            <p>{course.description || "Course feedback"}</p>
+                                        </div>
+                                        <span className="course-rating">
+                                            ⭐ {Number(course.averageRating).toFixed(1)}
+                                        </span>
+                                    </div>
+                                    <div className="course-meta">
+                                        <span>{course.reviewCount} {course.reviewCount === 1 ? "Review" : "Reviews"}</span>
+                                        <span>{getRatingLabel(Number(course.averageRating))}</span>
+                                    </div>
+                                    <div className="progress">
+                                        <div
+                                            className="progress-fill"
+                                            style={{ width: `${(Number(course.averageRating) / 5) * 100}%` }}
+                                        />
+                                    </div>
                                 </div>
-
-                                <span className="course-rating">
-                                    ⭐ 4.9
-                                </span>
-
-                            </div>
-
-
-                            <div className="course-meta">
-
-                                <span>
-                                    248 Reviews
-                                </span>
-
-                                <span>
-                                    Excellent
-                                </span>
-
-                            </div>
-
-
-                            <div className="progress">
-
-                                <div
-                                    className="progress-fill"
-                                    style={{ width: "98%" }}
-                                ></div>
-
-                            </div>
-
-
-                            <button
-                                className="course-btn"
-                                type="button"
-                            >
-                                View Details →
-                            </button>
-
-                        </div>
-
-
-                        {/* Python */}
-
-                        <div className="course-card">
-
-                            <div className="course-rank">
-                                #2
-                            </div>
-
-                            <div className="course-card-header">
-
-                                <div>
-
-                                    <h3>
-                                        Python
-                                    </h3>
-
-                                    <p>
-                                        Programming & development
-                                    </p>
-
-                                </div>
-
-                                <span className="course-rating">
-                                    ⭐ 4.8
-                                </span>
-
-                            </div>
-
-
-                            <div className="course-meta">
-
-                                <span>
-                                    215 Reviews
-                                </span>
-
-                                <span>
-                                    Excellent
-                                </span>
-
-                            </div>
-
-
-                            <div className="progress">
-
-                                <div
-                                    className="progress-fill"
-                                    style={{ width: "92%" }}
-                                ></div>
-
-                            </div>
-
-
-                            <button
-                                className="course-btn"
-                                type="button"
-                            >
-                                View Details →
-                            </button>
-
-                        </div>
-
-
-                        {/* Web Development */}
-
-                        <div className="course-card">
-
-                            <div className="course-rank">
-                                #3
-                            </div>
-
-                            <div className="course-card-header">
-
-                                <div>
-
-                                    <h3>
-                                        Web Development
-                                    </h3>
-
-                                    <p>
-                                        Frontend & backend
-                                    </p>
-
-                                </div>
-
-                                <span className="course-rating">
-                                    ⭐ 4.7
-                                </span>
-
-                            </div>
-
-
-                            <div className="course-meta">
-
-                                <span>
-                                    198 Reviews
-                                </span>
-
-                                <span>
-                                    Very Good
-                                </span>
-
-                            </div>
-
-
-                            <div className="progress">
-
-                                <div
-                                    className="progress-fill"
-                                    style={{ width: "89%" }}
-                                ></div>
-
-                            </div>
-
-
-                            <button
-                                className="course-btn"
-                                type="button"
-                            >
-                                View Details →
-                            </button>
-
-                        </div>
+                            ))
+                        )}
 
                     </div>
 

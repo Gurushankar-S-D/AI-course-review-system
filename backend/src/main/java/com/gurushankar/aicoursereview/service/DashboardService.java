@@ -9,4 +9,5 @@ public interface DashboardService {
 
     DashboardResponse getDashboard();
     List<RecentReviewResponse> getRecentReviews();
+
 }

@@ -19,6 +19,10 @@ import {
     getAnalysesForReviews
 } from "../../services/analysisService";
 
+import {
+    getAllUsers,
+    deleteUser
+} from "../../services/userService";
 
 function Admin() {
 
@@ -43,6 +47,7 @@ function Admin() {
     const [selectedCourseId, setSelectedCourseId] = useState("");
 
     const [aiAnalyses, setAiAnalyses] = useState([]);
+    const [overallAiAnalyses, setOverallAiAnalyses] = useState([]);
     const [aiLoading, setAiLoading] = useState(false);
 
     const [loading, setLoading] = useState(true);
@@ -51,6 +56,9 @@ function Admin() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
 
+    const [users, setUsers] = useState([]);
+    const [userSearch, setUserSearch] = useState("");
+    const [userLoading, setUserLoading] = useState(false);
 
     // =========================
     // LOAD DATA
@@ -73,9 +81,34 @@ function Admin() {
                 getAllReviews()
             ]);
 
-            setCourses(Array.isArray(coursesData) ? coursesData : []);
-            setCourseSummary(Array.isArray(summaryData) ? summaryData : []);
-            setReviews(Array.isArray(reviewsData) ? reviewsData : []);
+            const safeCourses =
+                Array.isArray(coursesData)
+                    ? coursesData
+                    : [];
+
+            const safeSummary =
+                Array.isArray(summaryData)
+                    ? summaryData
+                    : [];
+
+            const safeReviews =
+                Array.isArray(reviewsData)
+                    ? reviewsData
+                    : [];
+
+            setCourses(safeCourses);
+            setCourseSummary(safeSummary);
+            setReviews(safeReviews);
+
+            // Load AI analysis for ALL reviews
+            const overallAnalyses =
+                await getAnalysesForReviews(safeReviews);
+
+            setOverallAiAnalyses(
+                Array.isArray(overallAnalyses)
+                    ? overallAnalyses
+                    : []
+            );
 
         } catch (err) {
 
@@ -89,14 +122,169 @@ function Admin() {
         } finally {
 
             setLoading(false);
+
+        }
+    };
+    const overallAiStats = useMemo(() => {
+
+        if (!overallAiAnalyses.length) {
+            return {
+                analysedCourses: 0,
+                positivePercentage: 0
+            };
+        }
+
+        const reviewMap = new Map(
+            reviews.map((review) => [
+                String(review.reviewId),
+                review
+            ])
+        );
+
+        const analysedCourseNames = new Set();
+
+        let positiveCount = 0;
+
+        overallAiAnalyses.forEach((analysis) => {
+
+            const review = reviewMap.get(
+                String(analysis?.reviewId)
+            );
+
+            if (review?.courseName) {
+                analysedCourseNames.add(
+                    String(review.courseName)
+                );
+            }
+
+            const sentiment =
+                String(
+                    analysis?.sentiment || ""
+                ).toLowerCase();
+
+            if (sentiment.includes("positive")) {
+                positiveCount++;
+            }
+        });
+
+        const totalAnalyses =
+            overallAiAnalyses.length;
+
+        return {
+            analysedCourses:
+            analysedCourseNames.size,
+
+            positivePercentage:
+                Math.round(
+                    (positiveCount / totalAnalyses) * 100
+                )
+        };
+
+    }, [overallAiAnalyses, reviews]);
+
+    const loadUsers = async () => {
+        try {
+            setUserLoading(true);
+
+            const usersData = await getAllUsers();
+
+            setUsers(
+                Array.isArray(usersData)
+                    ? usersData
+                    : []
+            );
+
+        } catch (err) {
+            console.error("User loading error:", err);
+
+            setError(
+                err?.response?.data?.message ||
+                "Failed to load users."
+            );
+
+        } finally {
+            setUserLoading(false);
         }
     };
 
-
     useEffect(() => {
         loadData();
+        loadUsers();
     }, []);
 
+    // =========================
+// USER MANAGEMENT
+// =========================
+
+    const handleDeleteUser = async (user) => {
+        if (!user?.userId) {
+            setError("Invalid user ID.");
+            return;
+        }
+
+        const confirmed = window.confirm(
+            `Are you sure you want to delete user "${user.username}"?`
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        try {
+            setUserLoading(true);
+            setError("");
+            setMessage("");
+
+            await deleteUser(user.userId);
+
+            setMessage(
+                `User "${user.username}" deleted successfully.`
+            );
+
+            await loadUsers();
+
+        } catch (err) {
+            console.error("DELETE USER ERROR:", err);
+
+            if (err?.response?.status === 401) {
+                setError(
+                    "Your login session has expired. Please login again."
+                );
+            } else if (err?.response?.status === 403) {
+                setError(
+                    "You are not authorized to delete users."
+                );
+            } else {
+                setError(
+                    err?.response?.data?.message ||
+                    "Failed to delete user."
+                );
+            }
+
+        } finally {
+            setUserLoading(false);
+        }
+    };
+
+    const filteredUsers = useMemo(() => {
+        const text = userSearch.toLowerCase().trim();
+
+        if (!text) {
+            return users;
+        }
+
+        return users.filter((user) =>
+            String(user.username || "")
+                .toLowerCase()
+                .includes(text) ||
+            String(user.email || "")
+                .toLowerCase()
+                .includes(text) ||
+            String(user.role || "")
+                .toLowerCase()
+                .includes(text)
+        );
+    }, [users, userSearch]);
 
     // =========================
     // COURSE MANAGEMENT
@@ -497,6 +685,15 @@ function Admin() {
 
             setAiAnalyses(analyses);
 
+            const refreshedOverallAnalyses =
+                await getAnalysesForReviews(reviews);
+
+            setOverallAiAnalyses(
+                Array.isArray(refreshedOverallAnalyses)
+                    ? refreshedOverallAnalyses
+                    : []
+            );
+
             if (analyses.length === 0) {
 
                 setMessage(
@@ -706,7 +903,7 @@ function Admin() {
                         <div className="admin-dashboard-card">
                             <h3>AI Analysed</h3>
                             <span>
-                                {aiAnalyses.length}
+                                 {overallAiStats.analysedCourses}
                             </span>
                         </div>
 
@@ -733,10 +930,10 @@ function Admin() {
                         <div className="admin-dashboard-card">
                             <h3>Positive AI Reviews</h3>
                             <span>
-                                {aiAnalyses.length
-                                    ? `${aiStats.positive}%`
-                                    : "—"}
-                            </span>
+        {overallAiAnalyses.length
+            ? `${overallAiStats.positivePercentage}%`
+            : "—"}
+    </span>
                         </div>
 
                     </div>
@@ -1105,6 +1302,130 @@ function Admin() {
                             )
 
                         )}
+
+                    </div>
+
+                </section>
+
+
+                {/* =========================
+                    USER MANAGEMENT
+                ========================= */}
+
+                <section className="admin-section">
+
+                    <h2>👥 User Management</h2>
+
+                    <div className="user-management">
+
+                        <div className="user-toolbar">
+
+                            <input
+                                type="text"
+                                placeholder="Search users by username, email or role..."
+                                value={userSearch}
+                                onChange={(e) =>
+                                    setUserSearch(e.target.value)
+                                }
+                            />
+
+                            <span className="user-count">
+                                {filteredUsers.length} user
+                                {filteredUsers.length !== 1 ? "s" : ""}
+                            </span>
+
+                        </div>
+
+                        <div className="user-table-card">
+
+                            {userLoading ? (
+
+                                <p>Loading users...</p>
+
+                            ) : filteredUsers.length === 0 ? (
+
+                                <div className="empty-users">
+                                    <div className="empty-users-icon">
+                                        👤
+                                    </div>
+
+                                    <h3>No users found</h3>
+
+                                    <p>
+                                        Try changing your search
+                                        or add a new user.
+                                    </p>
+                                </div>
+
+                            ) : (
+
+                                <div className="table-wrapper">
+
+                                    <table>
+
+                                        <thead>
+                                        <tr>
+                                            <th>Username</th>
+                                            <th>Email</th>
+                                            <th>Role</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                        </thead>
+
+                                        <tbody>
+
+                                        {filteredUsers.map((user) => (
+
+                                            <tr key={user.userId}>
+
+                                                <td>
+                                                    <strong>
+                                                        {user.username}
+                                                    </strong>
+                                                </td>
+
+                                                <td>
+                                                    {user.email || "—"}
+                                                </td>
+
+                                                <td>
+                                                        <span
+                                                            className={`user-role ${
+                                                                String(
+                                                                    user.role || ""
+                                                                ).toLowerCase()
+                                                            }`}
+                                                        >
+                                                            {user.role || "USER"}
+                                                        </span>
+                                                </td>
+
+                                                <td>
+                                                    <button
+                                                        type="button"
+                                                        className="delete-btn"
+                                                        onClick={() =>
+                                                            handleDeleteUser(user)
+                                                        }
+                                                        disabled={userLoading}
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+
+                                            </tr>
+
+                                        ))}
+
+                                        </tbody>
+
+                                    </table>
+
+                                </div>
+
+                            )}
+
+                        </div>
 
                     </div>
 

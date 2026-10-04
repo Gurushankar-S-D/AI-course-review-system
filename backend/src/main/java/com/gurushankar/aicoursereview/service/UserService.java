@@ -49,4 +49,11 @@ public class UserService {
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
+            throw new RuntimeException("User not found");
+        }
+
+        userRepository.deleteById(userId);
+    }
 }

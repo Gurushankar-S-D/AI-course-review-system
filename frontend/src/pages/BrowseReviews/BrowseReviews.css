@@ -60,7 +60,7 @@
 }
 
 .filter-section input::placeholder {
-    color: var(--muted-text);
+    color: var(--text-secondary);
 }
 
 .filter-section input:focus,
@@ -115,10 +115,16 @@
 /* ---------- Username ---------- */
 
 .review-user {
-    font-size: 18px;
-    font-weight: bold;
-
+    font-family: sans-serif;
+    font-size: 26px;
+    font-weight: 800;
     color: var(--text);
+}
+.review-date {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
 }
 
 
@@ -145,7 +151,7 @@
 /* ---------- Review Text ---------- */
 
 .review-text {
-    color: var(--muted-text);
+    color: var(--text-secondary);
 
     line-height: 1.7;
 }
@@ -159,7 +165,7 @@
     padding: 50px;
 
     background: var(--card);
-    color: var(--muted-text);
+    color: var(--text-secondary);
 
     border: 1px solid var(--border);
 
@@ -213,6 +219,10 @@ body.dark .review-user {
     color: #f8fafc;
 }
 
+body.dark .review-date {
+    color: #94a3b8;
+}
+
 body.dark .review-course {
     color: #60a5fa;
 }
@@ -263,4 +273,5 @@ body.dark .no-review {
         align-items: flex-start;
         gap: 10px;
     }
+
 }
