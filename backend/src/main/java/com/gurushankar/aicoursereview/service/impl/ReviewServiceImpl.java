@@ -12,12 +12,10 @@ import com.gurushankar.aicoursereview.repository.CourseRepository;
 import com.gurushankar.aicoursereview.repository.ReviewRepository;
 import com.gurushankar.aicoursereview.repository.UserRepository;
 import com.gurushankar.aicoursereview.service.ReviewService;
+import com.gurushankar.aicoursereview.service.ReviewAIAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import com.gurushankar.aicoursereview.dto.gemini.GeminiAnalysisResponse;
-import com.gurushankar.aicoursereview.entity.ReviewAnalysis;
 import com.gurushankar.aicoursereview.repository.ReviewAnalysisRepository;
-import com.gurushankar.aicoursereview.service.SentimentAnalysisService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -26,11 +24,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
 
-    private final SentimentAnalysisService sentimentAnalysisService;
     private final ReviewAnalysisRepository reviewAnalysisRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private final ReviewAIAnalysisService reviewAIAnalysisService;
     private static final Logger logger =
             LoggerFactory.getLogger(ReviewServiceImpl.class);
 
@@ -54,52 +52,18 @@ public class ReviewServiceImpl implements ReviewService {
 
         Review savedReview = reviewRepository.save(review);
 
-        System.out.println("======================================");
-        logger.info("Review {} saved successfully", savedReview.getReviewId());
-        System.out.println("Review ID : " + savedReview.getReviewId());
-        System.out.println("======================================");
+        logger.info(
+                "Review {} saved successfully",
+                savedReview.getReviewId()
+        );
 
-        try {
-
-            logger.info("Starting AI analysis for review {}",
-                    savedReview.getReviewId());
-
-            analyzeReview(savedReview);
-
-            logger.info("AI analysis completed successfully for review {}",
-                    savedReview.getReviewId());
-
-        } catch (Exception e) {
-
-            logger.error("AI analysis failed for review {}",
-                    savedReview.getReviewId(), e);
-
-        }
+        // Start AI analysis in the background.
+        // The student does not have to wait for Gemini.
+        reviewAIAnalysisService.analyzeReviewAsync(
+                savedReview.getReviewId()
+        );
 
         return mapToResponse(savedReview);
-    }
-    private void analyzeReview(Review savedReview) {
-
-        GeminiAnalysisResponse aiResponse =
-                sentimentAnalysisService.analyzeReview(
-                        savedReview.getReviewText()
-                );
-
-        ReviewAnalysis reviewAnalysis =
-                ReviewAnalysis.builder()
-
-                        .review(savedReview)
-
-                        .sentiment(aiResponse.getSentiment())
-
-                        .summary(aiResponse.getSummary())
-
-                        .keywords(aiResponse.getKeywords())
-
-                        .build();
-
-        reviewAnalysisRepository.save(reviewAnalysis);
-
     }
 
     @Override
