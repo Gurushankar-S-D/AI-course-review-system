@@ -7,7 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
+import com.gurushankar.aicoursereview.dto.CourseSummaryResponse;
 import java.util.List;
 
 @RestController
@@ -23,6 +23,10 @@ public class CourseController {
         return courseService.addCourse(request);
     }
 
+    @GetMapping("/summary")
+    public List<CourseSummaryResponse> getCourseSummary() {
+        return courseService.getCourseSummary();
+    }
     @GetMapping
     public List<CourseResponse> getAllCourses() {
         return courseService.getAllCourses();

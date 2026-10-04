@@ -1,0 +1,830 @@
+/* =========================================================
+   DASHBOARD
+   Clean • Full Width • Responsive • Light/Dark Mode
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.dashboard-page {
+    width: 100%;
+    min-height: calc(100vh - 72px);
+    padding: 40px 48px 60px;
+    box-sizing: border-box;
+
+    background: var(--bg);
+    color: var(--text);
+
+    transition:
+            background-color 0.25s ease,
+            color 0.25s ease;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.dashboard-header {
+    width: 100%;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    margin-bottom: 36px;
+}
+
+.dashboard-title h1 {
+    margin: 0;
+
+    font-size: 34px;
+    line-height: 1.2;
+    font-weight: 750;
+
+    color: var(--text);
+}
+
+.dashboard-title p {
+    margin: 8px 0 0;
+
+    font-size: 16px;
+    line-height: 1.6;
+
+    color: var(--text-secondary);
+}
+
+
+/* =========================================================
+   COMMON SECTION
+   ========================================================= */
+
+.dashboard-page section {
+    width: 100%;
+    margin-bottom: 48px;
+}
+
+.overview-section {
+    margin-top: 0;
+}
+
+.analytics-section {
+    margin-top: 0;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 20px;
+}
+
+.section-header h2 {
+    margin: 0;
+
+    font-size: 25px;
+    line-height: 1.3;
+    font-weight: 700;
+
+    color: var(--text);
+}
+
+.section-header span {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+
+/* =========================================================
+   DASHBOARD GRID
+   ========================================================= */
+
+.dashboard-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 22px;
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
+
+.stats-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+
+    gap: 22px;
+}
+
+.stat-card {
+    min-width: 0;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+
+    padding: 24px;
+
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+
+    transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease,
+            background-color 0.25s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+            0 14px 32px rgba(0, 0, 0, 0.09);
+
+    border-color: rgba(79, 70, 229, 0.25);
+}
+
+.stat-icon {
+    width: 52px;
+    height: 52px;
+
+    flex: 0 0 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 14px;
+
+    background: rgba(79, 70, 229, 0.10);
+    color: var(--primary);
+}
+
+.stat-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.stat-info p {
+    margin: 0;
+
+    font-size: 14px;
+    font-weight: 500;
+
+    color: var(--text-secondary);
+}
+
+.stat-info h2 {
+    margin: 7px 0 4px;
+
+    font-size: 32px;
+    line-height: 1.15;
+    font-weight: 750;
+
+    color: var(--text);
+}
+
+.stat-info span {
+    display: block;
+
+    font-size: 13px;
+
+    color: var(--text-secondary);
+}
+
+
+/* =========================================================
+   ANALYTICS
+   ========================================================= */
+
+.analytics-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+
+    gap: 24px;
+}
+
+.chart-card {
+    min-width: 0;
+
+    padding: 24px;
+
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
+
+    transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            background-color 0.25s ease;
+}
+
+.chart-card:hover {
+    transform: translateY(-3px);
+
+    box-shadow:
+            0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.chart-header {
+    margin-bottom: 18px;
+}
+
+.chart-header h3 {
+    margin: 0;
+
+    font-size: 18px;
+    line-height: 1.4;
+    font-weight: 650;
+
+    color: var(--text);
+}
+
+.chart-body {
+    width: 100%;
+    height: 320px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+}
+
+
+/* =========================================================
+   RECENT REVIEWS
+   ========================================================= */
+
+.review-list,
+.reviews-list {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+.review-card {
+    width: 100%;
+    min-width: 0;
+
+    box-sizing: border-box;
+
+    padding: 22px 24px;
+
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.045);
+
+    transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease,
+            background-color 0.25s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(79, 70, 229, 0.22);
+
+    box-shadow:
+            0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 20px;
+}
+
+.review-avatar {
+    width: 46px;
+    height: 46px;
+
+    flex: 0 0 46px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(79, 70, 229, 0.10);
+    color: var(--primary);
+
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.review-text {
+    margin-top: 14px;
+
+    font-size: 16px;
+    line-height: 1.65;
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   TOP COURSES
+   ========================================================= */
+
+.courses-grid {
+    width: 100%;
+
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 22px;
+}
+
+.course-card {
+    min-width: 0;
+
+    padding: 24px;
+
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 18px;
+
+    box-shadow: 0 5px 18px rgba(0, 0, 0, 0.045);
+
+    transition:
+            transform 0.25s ease,
+            box-shadow 0.25s ease,
+            border-color 0.25s ease,
+            background-color 0.25s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-4px);
+
+    border-color: rgba(79, 70, 229, 0.22);
+
+    box-shadow:
+            0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+
+/* =========================================================
+   PROGRESS BAR
+   ========================================================= */
+
+.progress {
+    width: 100%;
+    height: 9px;
+
+    margin: 18px 0;
+
+    overflow: hidden;
+
+    background: var(--surface-2);
+
+    border-radius: 999px;
+}
+
+.progress-fill {
+    height: 100%;
+
+    width: 96%;
+
+    background: var(--primary);
+
+    border-radius: inherit;
+
+    transition: width 0.4s ease;
+}
+
+
+/* =========================================================
+   COURSE BUTTON
+   ========================================================= */
+
+.course-btn {
+    width: 100%;
+
+    margin-top: 18px;
+    padding: 12px 16px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: var(--primary);
+    color: #ffffff;
+
+    font-size: 14px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    transition:
+            background-color 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.course-btn:hover {
+    background: var(--primary-hover);
+
+    transform: translateY(-1px);
+
+    box-shadow:
+            0 8px 18px rgba(79, 70, 229, 0.22);
+}
+
+.course-btn:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   DARK MODE
+   Uses the variables from index.css / ThemeContext
+   ========================================================= */
+
+body.dark .dashboard-page {
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+body.dark .dashboard-title h1,
+body.dark .section-header h2,
+body.dark .dashboard-title p,
+body.dark .section-header span {
+    color: #f8fafc;
+}
+
+body.dark .dashboard-title p,
+body.dark .section-header span {
+    color: #94a3b8;
+}
+
+
+/* ---------- Statistics ---------- */
+
+body.dark .stat-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .stat-card:hover {
+    border-color: #6366f1;
+
+    box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.40);
+}
+
+body.dark .stat-info p,
+body.dark .stat-info span {
+    color: #94a3b8;
+}
+
+body.dark .stat-info h2 {
+    color: #f8fafc;
+}
+
+body.dark .stat-icon {
+    background: rgba(99, 102, 241, 0.16);
+    color: #818cf8;
+}
+
+
+/* ---------- Analytics ---------- */
+
+body.dark .chart-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .chart-card:hover {
+    box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.40);
+}
+
+body.dark .chart-header h3 {
+    color: #f8fafc;
+}
+
+
+/* ---------- Reviews ---------- */
+
+body.dark .review-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .review-card:hover {
+    border-color: #6366f1;
+
+    box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.40);
+}
+
+body.dark .review-avatar {
+    background: rgba(99, 102, 241, 0.16);
+    color: #818cf8;
+}
+
+body.dark .review-text {
+    color: #e2e8f0;
+}
+
+
+/* ---------- Courses ---------- */
+
+body.dark .course-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 8px 24px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .course-card:hover {
+    border-color: #6366f1;
+
+    box-shadow:
+            0 14px 34px rgba(0, 0, 0, 0.40);
+}
+
+
+/* ---------- Progress ---------- */
+
+body.dark .progress {
+    background: #334155;
+}
+
+body.dark .progress-fill {
+    background: #6366f1;
+}
+
+
+/* ---------- Course Button ---------- */
+
+body.dark .course-btn {
+    background: #6366f1;
+    color: #ffffff;
+}
+
+body.dark .course-btn:hover {
+    background: #818cf8;
+}
+
+/* =========================================================
+   LARGE SCREENS
+   ========================================================= */
+
+@media (min-width: 1500px) {
+
+    .dashboard-page {
+        padding-left: 64px;
+        padding-right: 64px;
+    }
+
+    .stat-card {
+        padding: 26px;
+    }
+
+    .review-card {
+        padding: 24px 28px;
+    }
+}
+
+
+/* =========================================================
+   TABLET / LAPTOP
+   ========================================================= */
+
+@media (max-width: 1200px) {
+
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .courses-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dashboard-page {
+        padding-left: 32px;
+        padding-right: 32px;
+    }
+}
+
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .dashboard-page {
+        padding: 30px 24px 50px;
+    }
+
+    .dashboard-header {
+        margin-bottom: 30px;
+    }
+
+    .dashboard-title h1 {
+        font-size: 30px;
+    }
+
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .chart-body {
+        height: 300px;
+    }
+
+    .courses-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 640px) {
+
+    .dashboard-page {
+        padding: 24px 16px 40px;
+    }
+
+    .dashboard-header {
+        display: block;
+
+        margin-bottom: 28px;
+    }
+
+    .dashboard-title h1 {
+        font-size: 27px;
+    }
+
+    .dashboard-title p {
+        font-size: 14px;
+    }
+
+    .dashboard-page section {
+        margin-bottom: 36px;
+    }
+
+    .section-header {
+        align-items: flex-start;
+        flex-direction: column;
+
+        gap: 6px;
+
+        margin-bottom: 16px;
+    }
+
+    .section-header h2 {
+        font-size: 22px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+
+        gap: 14px;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+
+        gap: 14px;
+    }
+
+    .stat-card {
+        padding: 20px;
+    }
+
+    .stat-info h2 {
+        font-size: 29px;
+    }
+
+    .chart-card {
+        padding: 18px;
+    }
+
+    .chart-body {
+        height: 260px;
+    }
+
+    .review-card {
+        padding: 18px;
+    }
+
+    .review-header {
+        gap: 12px;
+    }
+
+    .review-text {
+        font-size: 15px;
+    }
+
+    .course-card {
+        padding: 20px;
+    }
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 420px) {
+
+    .dashboard-page {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .dashboard-title h1 {
+        font-size: 24px;
+    }
+
+    .stat-card {
+        padding: 18px;
+        gap: 13px;
+    }
+
+    .stat-icon {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+    }
+
+    .stat-info h2 {
+        font-size: 26px;
+    }
+
+    .review-header {
+        align-items: flex-start;
+    }
+
+    .review-avatar {
+        width: 42px;
+        height: 42px;
+        flex-basis: 42px;
+    }
+
+    .chart-body {
+        height: 230px;
+    }
+}

@@ -1,0 +1,39 @@
+.course-card{
+
+    background:white;
+
+    border-radius:15px;
+
+    padding:25px;
+
+    margin-bottom:20px;
+
+    box-shadow:0 4px 15px rgba(0,0,0,.1);
+
+    transition:.3s;
+
+}
+
+.course-card:hover{
+
+    transform:translateY(-5px);
+
+}
+
+.course-rating{
+
+    color:#f59e0b;
+
+    font-weight:bold;
+
+    margin-top:15px;
+
+}
+
+.course-reviews{
+
+    margin-top:10px;
+
+    color:#64748b;
+
+}

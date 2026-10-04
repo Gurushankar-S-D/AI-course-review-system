@@ -1,0 +1,200 @@
+/* =========================================================
+   COURSES PAGE
+   Light + Dark Mode
+   ========================================================= */
+
+.courses-page {
+    width: 100%;
+
+    min-height: calc(100vh - 80px);
+
+    max-width: 1400px;
+
+    margin: auto;
+
+    padding: 40px 48px;
+
+    background: var(--bg);
+    color: var(--text);
+
+    box-sizing: border-box;
+}
+
+
+/* ---------- Page Header ---------- */
+
+.page-header {
+    margin-bottom: 35px;
+}
+
+.page-header h1 {
+    font-size: 36px;
+
+    color: var(--text);
+
+    margin-bottom: 8px;
+}
+
+.page-header p {
+    color: var(--muted-text);
+
+    font-size: 16px;
+}
+
+
+/* ---------- Course Grid ---------- */
+
+.course-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(320px, 1fr));
+
+    gap: 25px;
+}
+
+
+/* =========================================================
+   COURSE CARD
+   ========================================================= */
+
+.course-card {
+    background: var(--card);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+
+    border-radius: 15px;
+
+    padding: 25px;
+
+    margin-bottom: 20px;
+
+    box-shadow:
+            0 4px 15px rgba(0, 0, 0, 0.10);
+
+    transition:
+            transform 0.3s ease,
+            background 0.3s ease,
+            border-color 0.3s ease,
+            box-shadow 0.3s ease;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+
+/* ---------- Course Title ---------- */
+
+.course-card h2,
+.course-card h3 {
+    color: var(--text);
+
+    margin-bottom: 12px;
+}
+
+
+/* ---------- Description ---------- */
+
+.course-card p {
+    color: var(--muted-text);
+
+    line-height: 1.6;
+}
+
+
+/* ---------- Rating ---------- */
+
+.course-rating {
+    color: #f59e0b;
+
+    font-weight: bold;
+
+    margin-top: 15px;
+}
+
+
+/* ---------- Reviews ---------- */
+
+.course-reviews {
+    margin-top: 10px;
+
+    color: var(--muted-text);
+}
+
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+body.dark .courses-page {
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+body.dark .page-header h1 {
+    color: #f8fafc;
+}
+
+body.dark .page-header p {
+    color: #94a3b8;
+}
+
+body.dark .course-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 8px 25px rgba(0, 0, 0, 0.30);
+}
+
+body.dark .course-card h2,
+body.dark .course-card h3 {
+    color: #f8fafc;
+}
+
+body.dark .course-card p {
+    color: #cbd5e1;
+}
+
+body.dark .course-rating {
+    color: #f59e0b;
+}
+
+body.dark .course-reviews {
+    color: #94a3b8;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .courses-page {
+        padding: 30px 24px;
+    }
+
+    .course-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .courses-page {
+        padding: 25px 16px;
+    }
+
+    .page-header h1 {
+        font-size: 30px;
+    }
+
+    .course-card {
+        padding: 20px;
+    }
+}

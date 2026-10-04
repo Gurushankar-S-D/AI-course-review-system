@@ -1,0 +1,82 @@
+/* =========================================
+   REGISTER-SPECIFIC STYLES
+========================================= */
+
+
+/* Password strength */
+
+.password-strength {
+    margin-top: 9px;
+}
+
+.strength-track {
+    width: 100%;
+    height: 6px;
+
+    overflow: hidden;
+
+    border-radius: 10px;
+
+    background: var(--border);
+}
+
+.strength-fill {
+    height: 100%;
+
+    border-radius: 10px;
+
+    transition:
+            width 0.3s ease,
+            background 0.3s ease;
+}
+
+
+/* Weak */
+
+.strength-fill.weak {
+    background: #ef4444;
+}
+
+.strength-label.weak {
+    color: #ef4444;
+}
+
+
+/* Medium */
+
+.strength-fill.medium {
+    background: #f59e0b;
+}
+
+.strength-label.medium {
+    color: #f59e0b;
+}
+
+
+/* Strong */
+
+.strength-fill.strong {
+    background: #22c55e;
+}
+
+.strength-label.strong {
+    color: #22c55e;
+}
+
+
+.strength-label {
+    display: block;
+
+    margin-top: 6px;
+
+    font-size: 12px;
+
+    font-weight: 700;
+}
+
+
+/* Dark mode */
+
+body.dark .strength-track {
+    background: #334155;
+}

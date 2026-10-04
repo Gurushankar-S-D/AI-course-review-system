@@ -1,0 +1,267 @@
+/* =========================================================
+   SUBMIT REVIEW PAGE
+   Light + Dark Mode
+   ========================================================= */
+
+.submit-review-page {
+    width: 100%;
+    min-height: calc(100vh - 80px);
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    padding: 50px 24px;
+
+    background: var(--bg);
+    color: var(--text);
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   FORM CARD
+   ========================================================= */
+
+.submit-review-card {
+    width: 100%;
+    max-width: 700px;
+
+    background: var(--card);
+    color: var(--text);
+
+    padding: 42px;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    box-shadow:
+            0 10px 35px rgba(0, 0, 0, 0.08);
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.submit-review-card h1 {
+    margin: 0 0 35px;
+
+    text-align: center;
+
+    font-size: 48px;
+    font-weight: 700;
+
+    color: var(--primary);
+
+    letter-spacing: -1px;
+}
+
+
+/* =========================================================
+   LABELS
+   ========================================================= */
+
+.submit-review-card label {
+    display: block;
+
+    margin: 20px 0 9px;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    color: var(--text);
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+.submit-review-card select {
+    width: 100%;
+
+    padding: 13px 15px;
+
+    font-size: 16px;
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    outline: none;
+
+    box-sizing: border-box;
+
+    cursor: pointer;
+}
+
+.submit-review-card select:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+            0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+
+/* =========================================================
+   TEXTAREA
+   ========================================================= */
+
+.submit-review-card textarea {
+    width: 100%;
+
+    min-height: 150px;
+
+    padding: 15px;
+
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.6;
+
+    background: var(--input-bg);
+    color: var(--text);
+
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    outline: none;
+
+    resize: vertical;
+
+    box-sizing: border-box;
+}
+
+.submit-review-card textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+.submit-review-card textarea:focus {
+    border-color: var(--primary);
+
+    box-shadow:
+            0 0 0 3px rgba(79, 70, 229, 0.12);
+}
+
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+
+.submit-review-card button {
+    width: 100%;
+
+    margin-top: 30px;
+
+    padding: 14px 20px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #2563eb;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            background 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
+}
+
+.submit-review-card button:hover {
+    background: #1d4ed8;
+
+    transform: translateY(-1px);
+
+    box-shadow:
+            0 6px 16px rgba(37, 99, 235, 0.25);
+}
+
+.submit-review-card button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   DARK MODE
+   ========================================================= */
+
+body.dark .submit-review-page {
+    background: #0f172a;
+    color: #f8fafc;
+}
+
+body.dark .submit-review-card {
+    background: #1e293b;
+    color: #f8fafc;
+
+    border-color: #334155;
+
+    box-shadow:
+            0 12px 35px rgba(0, 0, 0, 0.35);
+}
+
+body.dark .submit-review-card h1 {
+    color: #818cf8;
+}
+
+body.dark .submit-review-card label {
+    color: #f8fafc;
+}
+
+body.dark .submit-review-card select,
+body.dark .submit-review-card textarea {
+    background: #0f172a;
+    color: #f8fafc;
+
+    border-color: #475569;
+}
+
+body.dark .submit-review-card select:focus,
+body.dark .submit-review-card textarea:focus {
+    border-color: #818cf8;
+
+    box-shadow:
+            0 0 0 3px rgba(129, 140, 248, 0.15);
+}
+
+body.dark .submit-review-card textarea::placeholder {
+    color: #94a3b8;
+}
+
+body.dark .submit-review-card button {
+    background: #4f46e5;
+}
+
+body.dark .submit-review-card button:hover {
+    background: #6366f1;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .submit-review-page {
+        padding: 30px 16px;
+    }
+
+    .submit-review-card {
+        padding: 28px 22px;
+    }
+
+    .submit-review-card h1 {
+        font-size: 36px;
+    }
+}

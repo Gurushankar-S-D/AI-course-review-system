@@ -1,5 +1,7 @@
 package com.gurushankar.aicoursereview.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gurushankar.aicoursereview.dto.gemini.GeminiAnalysisResponse;
 import com.gurushankar.aicoursereview.dto.gemini.GeminiRequest;
@@ -19,6 +21,10 @@ public class SentimentAnalysisServiceImpl implements SentimentAnalysisService {
 
     private final RestClient restClient;
     private final ObjectMapper objectMapper;
+    private static final Logger logger =
+            LoggerFactory.getLogger(
+                    SentimentAnalysisServiceImpl.class
+            );
 
     @Value("${gemini.api.key}")
     private String apiKey;
@@ -29,19 +35,7 @@ public class SentimentAnalysisServiceImpl implements SentimentAnalysisService {
     @Override
     public GeminiAnalysisResponse analyzeReview(String reviewText) {
 
-        String prompt = """
-            Analyze the following course review.
-
-            Return ONLY valid JSON.
-
-            {
-              "sentiment":"Positive",
-              "summary":"Short summary",
-              "keywords":"Java, Practical, Instructor"
-            }
-
-            Review:
-            """ + reviewText;
+        String prompt = buildPrompt(reviewText);
 
         GeminiRequest request = new GeminiRequest(
                 List.of(
@@ -55,39 +49,84 @@ public class SentimentAnalysisServiceImpl implements SentimentAnalysisService {
 
         try {
 
-            String response = restClient.post()
+            String response = restClient
+                    .post()
                     .uri(apiUrl + "?key=" + apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(request)
                     .retrieve()
                     .body(String.class);
 
-            System.out.println("========== RAW GEMINI RESPONSE ==========");
-            System.out.println(response);
-            System.out.println("=========================================");
+            logger.info("Raw Gemini Response : {}", response);
 
             GeminiResponse geminiResponse =
                     objectMapper.readValue(response, GeminiResponse.class);
+            if (geminiResponse.getCandidates() == null ||
+                    geminiResponse.getCandidates().isEmpty()) {
 
-            String aiText =
-                    geminiResponse.getCandidates()
-                            .get(0)
-                            .getContent()
-                            .getParts()
-                            .get(0)
-                            .getText();
+                throw new RuntimeException("Gemini returned no response.");
 
-            return objectMapper.readValue(aiText, GeminiAnalysisResponse.class);
+            }
+            return parseResponse(geminiResponse);
 
-        } catch (Exception e) {
+        } catch (Exception ex) {
 
-            e.printStackTrace();
+            logger.error("Gemini API call failed", ex);
 
-            return new GeminiAnalysisResponse(
-                    "UNKNOWN",
-                    "Analysis Failed",
-                    "None"
-            );
+            return GeminiAnalysisResponse.builder()
+                    .sentiment("UNKNOWN")
+                    .summary("Unable to analyze review.")
+                    .keywords("None")
+                    .build();
         }
+    }
+    private String buildPrompt(String reviewText) {
+
+        return """
+You are an AI assistant that analyzes student course reviews.
+
+Analyze the following review and return ONLY valid JSON.
+
+Requirements:
+
+1. sentiment must be exactly one of:
+Positive
+Neutral
+Negative
+
+2. summary must be one sentence.
+
+3. keywords must contain 3 to 5 comma-separated keywords.
+
+Return ONLY this JSON:
+
+{
+  "sentiment":"Positive",
+  "summary":"Students appreciated the practical examples.",
+  "keywords":"Java, Spring Boot, Practical"
+}
+
+Review:
+""" + reviewText;
+
+    }
+    private GeminiAnalysisResponse parseResponse(
+            GeminiResponse geminiResponse
+    ) throws Exception {
+
+        String aiText = geminiResponse
+                .getCandidates()
+                .get(0)
+                .getContent()
+                .getParts()
+                .get(0)
+                .getText()
+                .trim();
+
+        return objectMapper.readValue(
+                aiText,
+                GeminiAnalysisResponse.class
+        );
+
     }
 }

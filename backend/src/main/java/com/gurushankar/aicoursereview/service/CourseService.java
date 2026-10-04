@@ -2,6 +2,7 @@ package com.gurushankar.aicoursereview.service;
 
 import com.gurushankar.aicoursereview.dto.CourseRequest;
 import com.gurushankar.aicoursereview.dto.CourseResponse;
+import com.gurushankar.aicoursereview.dto.CourseSummaryResponse;
 
 import java.util.List;
 
@@ -21,4 +22,5 @@ public interface CourseService {
 
     // Delete course
     void deleteCourse(Long courseId);
+    List<CourseSummaryResponse> getCourseSummary();
 }

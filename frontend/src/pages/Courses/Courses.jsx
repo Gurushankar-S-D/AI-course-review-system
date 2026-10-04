@@ -1,48 +1,57 @@
 import { useEffect, useState } from "react";
-import { getAllCourses } from "../../services/courseService";
-import { useNavigate } from "react-router-dom";
+import { getCourseSummary } from "../../services/courseService";
+import CourseCard from "../../components/CourseCard/CourseCard";
+import Layout from "../../components/Layout/Layout";
+import "./Courses.css";
 
 function Courses() {
 
     const [courses, setCourses] = useState([]);
-    const navigate = useNavigate();
+
     useEffect(() => {
         loadCourses();
     }, []);
 
     const loadCourses = async () => {
         try {
-            const data = await getAllCourses();
+            const data = await getCourseSummary();
             setCourses(data);
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
         }
     };
 
     return (
-        <div style={{ padding: "30px" }}>
-            <h1>Courses</h1>
+        <Layout>
 
-            {courses.map(course => (
-                <div
-                    key={course.courseId}
-                    style={{
-                        border: "1px solid #ddd",
-                        borderRadius: "10px",
-                        padding: "15px",
-                        marginBottom: "15px"
-                    }}
-                >
-                    <h3>{course.courseName}</h3>
+            <div className="courses-page">
 
-                    <button
-                        onClick={() => navigate(`/review/${course.courseId}`)}
-                    >
-                        Review Course
-                    </button>
+                <div className="page-header">
+
+                    <h1>Available Courses</h1>
+
+                    <p>
+                        Browse all available courses along with their average ratings.
+                    </p>
+
                 </div>
-            ))}
-        </div>
+
+                <div className="course-grid">
+
+                    {courses.map(course => (
+
+                        <CourseCard
+                            key={course.courseId}
+                            course={course}
+                        />
+
+                    ))}
+
+                </div>
+
+            </div>
+
+        </Layout>
     );
 }
 

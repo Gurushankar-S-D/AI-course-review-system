@@ -1,5 +1,8 @@
 package com.gurushankar.aicoursereview.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 import com.gurushankar.aicoursereview.dto.ReviewRequest;
 import com.gurushankar.aicoursereview.dto.ReviewResponse;
 import com.gurushankar.aicoursereview.entity.Course;
@@ -28,8 +31,11 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final CourseRepository courseRepository;
+    private static final Logger logger =
+            LoggerFactory.getLogger(ReviewServiceImpl.class);
 
     @Override
+    @Transactional
     public ReviewResponse addReview(ReviewRequest reviewRequest, String username) {
 
         User user = userRepository.findByUsername(username)
@@ -49,42 +55,51 @@ public class ReviewServiceImpl implements ReviewService {
         Review savedReview = reviewRepository.save(review);
 
         System.out.println("======================================");
-        System.out.println("STEP 1 - Review saved successfully");
+        logger.info("Review {} saved successfully", savedReview.getReviewId());
         System.out.println("Review ID : " + savedReview.getReviewId());
         System.out.println("======================================");
 
         try {
 
-            System.out.println("STEP 2 - Calling Gemini API");
+            logger.info("Starting AI analysis for review {}",
+                    savedReview.getReviewId());
 
-            GeminiAnalysisResponse aiResponse =
-                    sentimentAnalysisService.analyzeReview(savedReview.getReviewText());
+            analyzeReview(savedReview);
 
-            System.out.println("STEP 3 - Gemini Response Received");
-            System.out.println("Sentiment : " + aiResponse.getSentiment());
-            System.out.println("Summary   : " + aiResponse.getSummary());
-            System.out.println("Keywords  : " + aiResponse.getKeywords());
-
-            ReviewAnalysis reviewAnalysis = ReviewAnalysis.builder()
-                    .review(savedReview)
-                    .sentiment(aiResponse.getSentiment())
-                    .summary(aiResponse.getSummary())
-                    .keywords(aiResponse.getKeywords())
-                    .build();
-
-            reviewAnalysisRepository.save(reviewAnalysis);
-
-            System.out.println("STEP 4 - ReviewAnalysis saved successfully");
+            logger.info("AI analysis completed successfully for review {}",
+                    savedReview.getReviewId());
 
         } catch (Exception e) {
 
-            System.out.println("======================================");
-            System.out.println("GEMINI ERROR");
-            e.printStackTrace();
-            System.out.println("======================================");
+            logger.error("AI analysis failed for review {}",
+                    savedReview.getReviewId(), e);
+
         }
 
         return mapToResponse(savedReview);
+    }
+    private void analyzeReview(Review savedReview) {
+
+        GeminiAnalysisResponse aiResponse =
+                sentimentAnalysisService.analyzeReview(
+                        savedReview.getReviewText()
+                );
+
+        ReviewAnalysis reviewAnalysis =
+                ReviewAnalysis.builder()
+
+                        .review(savedReview)
+
+                        .sentiment(aiResponse.getSentiment())
+
+                        .summary(aiResponse.getSummary())
+
+                        .keywords(aiResponse.getKeywords())
+
+                        .build();
+
+        reviewAnalysisRepository.save(reviewAnalysis);
+
     }
 
     @Override
@@ -109,13 +124,32 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Override
+    @Transactional
     public void deleteReview(Long reviewId) {
+
+        logger.info("Deleting review {}", reviewId);
 
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() ->
                         new RuntimeException("Review not found"));
 
+        // Delete associated AI analysis first.
+        reviewAnalysisRepository
+                .findByReviewReviewId(reviewId)
+                .ifPresent(reviewAnalysis -> {
+                    logger.info(
+                            "Deleting AI analysis {} for review {}",
+                            reviewAnalysis.getAnalysisId(),
+                            reviewId
+                    );
+
+                    reviewAnalysisRepository.delete(reviewAnalysis);
+                });
+
+        // Now safely delete the review.
         reviewRepository.delete(review);
+
+        logger.info("Review {} deleted successfully", reviewId);
     }
 
     private ReviewResponse mapToResponse(Review review) {
