@@ -1,7 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../../components/Layout/Layout";
 import "./Admin.css";
-
+import {
+    getOverallAttendanceReport,
+    getStudentAttendanceReports,
+    getSessionAttendanceSummaries,
+    createAttendanceSession,
+    getPendingEnrollmentRequests,
+    approveEnrollmentRequest,
+    rejectEnrollmentRequest
+} from "../../services/attendanceService";
 import {
     getAllCourses,
     getCourseSummary,
@@ -29,7 +37,10 @@ function Admin() {
     // =========================
     // STATE
     // =========================
-
+    const [sessionTitle, setSessionTitle] = useState("");
+    const [sessionCourseId, setSessionCourseId] = useState("");
+    const [creatingSession, setCreatingSession] = useState(false);
+    const [createdSession, setCreatedSession] = useState(null);
     const [courses, setCourses] = useState([]);
     const [courseSummary, setCourseSummary] = useState([]);
     const [reviews, setReviews] = useState([]);
@@ -59,7 +70,51 @@ function Admin() {
     const [users, setUsers] = useState([]);
     const [userSearch, setUserSearch] = useState("");
     const [userLoading, setUserLoading] = useState(false);
+    const [attendanceOverview, setAttendanceOverview] = useState(null);
+    const [studentAttendanceReports, setStudentAttendanceReports] = useState([]);
+    const [sessionAttendanceSummaries, setSessionAttendanceSummaries] = useState([]);
+    const [attendanceLoading, setAttendanceLoading] = useState(false);
+    const [attendanceError, setAttendanceError] = useState("");
+    const [attendanceSearch, setAttendanceSearch] = useState("");
+    const [pendingEnrollmentRequests, setPendingEnrollmentRequests] = useState([]);
+    const [enrollmentActionId, setEnrollmentActionId] = useState(null);
+    const [currentCoursePage, setCurrentCoursePage] = useState(1);
+    const reviewsPerPage = 6;
+    const [currentReviewPage, setCurrentReviewPage] = useState(1);
+    const [currentUserPage, setCurrentUserPage] = useState(1);
+    const handleCreateAttendanceSession = async (event) => {
+        event.preventDefault();
 
+        if (!sessionTitle.trim()) {
+            setAttendanceError("Session title is required.");
+            return;
+        }
+
+        try {
+            setCreatingSession(true);
+            setAttendanceError("");
+            setCreatedSession(null);
+
+            const session = await createAttendanceSession(
+                sessionTitle.trim(),
+                sessionCourseId
+            );
+
+            setCreatedSession(session);
+            setSessionTitle("");
+            setSessionCourseId("");
+
+            await loadAttendanceReports();
+
+        } catch (err) {
+            setAttendanceError(
+                err?.response?.data?.message ||
+                "Unable to create attendance session."
+            );
+        } finally {
+            setCreatingSession(false);
+        }
+    };
     // =========================
     // LOAD DATA
     // =========================
@@ -207,9 +262,89 @@ function Admin() {
         }
     };
 
+    const loadAttendanceReports = async () => {
+        try {
+            setAttendanceLoading(true);
+            setAttendanceError("");
+
+            const [
+                overallData,
+                studentData,
+                sessionData,
+                pendingData
+            ] = await Promise.all([
+                getOverallAttendanceReport(),
+                getStudentAttendanceReports(),
+                getSessionAttendanceSummaries(),
+                getPendingEnrollmentRequests()
+            ]);
+
+            setAttendanceOverview(
+                overallData && typeof overallData === "object"
+                    ? overallData
+                    : null
+            );
+
+            setStudentAttendanceReports(
+                Array.isArray(studentData) ? studentData : []
+            );
+
+            setSessionAttendanceSummaries(
+                Array.isArray(sessionData) ? sessionData : []
+            );
+            setPendingEnrollmentRequests(
+                Array.isArray(pendingData) ? pendingData : []
+            );
+        } catch (err) {
+            console.error("Attendance reports loading error:", err);
+
+            setAttendanceError(
+                err?.response?.data?.message ||
+                "Failed to load attendance reports."
+            );
+        } finally {
+            setAttendanceLoading(false);
+        }
+    };
+    const filteredAttendanceStudents = useMemo(() => {
+        const searchText = attendanceSearch.toLowerCase().trim();
+
+        if (!searchText) {
+            return studentAttendanceReports;
+        }
+
+        return studentAttendanceReports.filter((student) =>
+            String(student.username || "")
+                .toLowerCase()
+                .includes(searchText)
+        );
+    }, [studentAttendanceReports, attendanceSearch]);
+    const handleEnrollmentDecision = async (enrollmentId, action) => {
+        try {
+            setEnrollmentActionId(enrollmentId);
+            setAttendanceError("");
+
+            if (action === "approve") {
+                await approveEnrollmentRequest(enrollmentId);
+            } else {
+                await rejectEnrollmentRequest(enrollmentId);
+            }
+
+            await loadAttendanceReports();
+
+        } catch (err) {
+            setAttendanceError(
+                err?.response?.data?.message ||
+                "Unable to update enrollment request."
+            );
+        } finally {
+            setEnrollmentActionId(null);
+        }
+    };
     useEffect(() => {
         loadData();
         loadUsers();
+        loadAttendanceReports();
     }, []);
 
     // =========================
@@ -285,6 +420,29 @@ function Admin() {
                 .includes(text)
         );
     }, [users, userSearch]);
+
+    const usersPerPage = 5;
+
+    const totalUserPages = Math.ceil(
+        filteredUsers.length / usersPerPage
+    );
+
+    const paginatedUsers = filteredUsers.slice(
+        (currentUserPage - 1) * usersPerPage,
+        currentUserPage * usersPerPage
+    );
+
+    useEffect(() => {
+        const lastValidPage = Math.max(
+            1,
+            Math.ceil(filteredUsers.length / usersPerPage)
+        );
+
+        if (currentUserPage > lastValidPage) {
+            setCurrentUserPage(lastValidPage);
+        }
+    }, [filteredUsers.length, currentUserPage]);
+
 
     // =========================
     // COURSE MANAGEMENT
@@ -515,6 +673,31 @@ function Admin() {
             setSaving(false);
         }
     };
+    // =========================
+// COURSE PAGINATION
+// =========================
+
+    const coursesPerPage = 5;
+
+    const totalCoursePages = Math.ceil(
+        courseSummary.length / coursesPerPage
+    );
+
+    const paginatedCourses = courseSummary.slice(
+        (currentCoursePage - 1) * coursesPerPage,
+        currentCoursePage * coursesPerPage
+    );
+
+    useEffect(() => {
+        const lastValidPage = Math.max(
+            1,
+            Math.ceil(courseSummary.length / coursesPerPage)
+        );
+
+        if (currentCoursePage > lastValidPage) {
+            setCurrentCoursePage(lastValidPage);
+        }
+    }, [courseSummary.length, currentCoursePage]);
 
 
     // =========================
@@ -625,6 +808,35 @@ function Admin() {
         ratingFilter,
         sentimentFilter
     ]);
+
+
+    const totalReviewPages = Math.ceil(
+        filteredReviews.length / reviewsPerPage
+    );
+
+    useEffect(() => {
+        const lastValidPage = Math.max(
+            1,
+            Math.ceil(filteredReviews.length / reviewsPerPage)
+        );
+
+        if (currentReviewPage > lastValidPage) {
+            setCurrentReviewPage(lastValidPage);
+        }
+    }, [
+        filteredReviews.length,
+        reviewsPerPage,
+        currentReviewPage
+    ]);
+
+    const startReviewIndex =
+        (currentReviewPage - 1) * reviewsPerPage;
+
+    const paginatedReviews = filteredReviews.slice(
+        startReviewIndex,
+        startReviewIndex + reviewsPerPage
+    );
+
 
 
     // =========================
@@ -942,6 +1154,321 @@ function Admin() {
 
 
                 {/* =========================
+                     ATTENDANCE ANALYTICS
+                    ========================= */}
+
+                <section className="admin-section">
+                    <div className="attendance-analysis"
+                        style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            gap: "12px",
+                            flexWrap: "wrap",
+                            marginBottom: "20px"
+                        }}
+                    >
+                        <h2 style={{ margin: 0 }}>📅 Attendance Analytics</h2>
+
+                        <button
+                            type="button"
+                            onClick={loadAttendanceReports}
+                            disabled={attendanceLoading}
+                            className="generate-btn"
+                        >
+                            {attendanceLoading ? "Refreshing..." : "↻ Refresh Reports"}
+                        </button>
+                    </div>
+                    <div className="course-table-card" style={{ marginTop: "24px" }}>
+                        <h3>Create Attendance Session</h3>
+
+                        <form
+                            onSubmit={handleCreateAttendanceSession}
+                            className="attendance-session-form"
+                        >
+                            <div>
+                                <label>Session Title</label>
+
+                                <input
+                                    type="text"
+                                    placeholder="Example: Java Training Session"
+                                    value={sessionTitle}
+                                    onChange={(event) =>
+                                        setSessionTitle(event.target.value)
+                                    }
+                                />
+                            </div>
+
+                            <div>
+                                <label>Course</label>
+
+                                <select
+                                    value={sessionCourseId}
+                                    onChange={(event) =>
+                                        setSessionCourseId(event.target.value)
+                                    }
+                                >
+                                    <option value="">No course selected</option>
+
+                                    {courses.map((course) => (
+                                        <option
+                                            key={course.courseId}
+                                            value={course.courseId}
+                                        >
+                                            {course.courseName}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <button
+                                type="submit"
+                                className="generate-btn"
+                                disabled={creatingSession}
+                            >
+                                {creatingSession
+                                    ? "Creating..."
+                                    : "Create Session"}
+                            </button>
+                        </form>
+
+                        {createdSession && (
+                            <div className="session-code-card">
+                                <strong>Session created successfully.</strong>
+
+                                <p>
+                                    Attendance code:{" "}
+                                    <strong className="session-code">
+                                        {createdSession.attendanceCode}
+                                    </strong>
+                                </p>
+
+                                <p>
+                                    Copy the attendance code now. It is displayed only once.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                    {attendanceLoading ? (
+                        <p>Loading attendance reports...</p>
+                    ) : attendanceError ? (
+                        <div className="admin-message error">
+                            {attendanceError}
+                            <button
+                                type="button"
+                                onClick={loadAttendanceReports}
+                                style={{ marginLeft: "12px" }}
+                            >
+                                Retry
+                            </button>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="dashboard-grid">
+                                <div className="admin-dashboard-card">
+                                    <h3>Total Sessions</h3>
+                                    <span>
+                        {attendanceOverview?.totalSessions ?? 0}
+                    </span>
+                                </div>
+
+                                <div className="admin-dashboard-card">
+                                    <h3>Registered Students</h3>
+                                    <span>
+                        {attendanceOverview?.totalRegisteredStudents ?? 0}
+                    </span>
+                                </div>
+
+                                <div className="admin-dashboard-card">
+                                    <h3>Attendance Submissions</h3>
+                                    <span>
+                        {attendanceOverview?.totalAttendanceSubmissions ?? 0}
+                    </span>
+                                </div>
+                            </div>
+                            <div className="course-table-card" style={{ marginTop: "24px" }}>
+                                <h3>Pending Enrollment Requests</h3>
+
+                                {pendingEnrollmentRequests.length === 0 ? (
+                                    <p>No pending enrollment requests.</p>
+                                ) : (
+                                    <div className="table-wrapper">
+                                        <table>
+                                            <thead>
+                                            <tr>
+                                                <th>Student</th>
+                                                <th>Session</th>
+                                                <th>Course</th>
+                                                <th>Requested At</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+
+                                            <tbody>
+                                            {pendingEnrollmentRequests.map((request) => (
+                                                <tr key={request.enrollmentId}>
+                                                    <td className="enrollment-action-cell">{request.username}</td>
+                                                    <td className="enrollment-action-cell">{request.sessionTitle}</td>
+                                                    <td className="enrollment-action-cell">{request.courseName || "—"}</td>
+                                                    <td className="enrollment-action-cell">
+                                                        {request.enrolledAt
+                                                            ? new Date(
+                                                                request.enrolledAt
+                                                            ).toLocaleString()
+                                                            : "—"}
+                                                    </td>
+                                                    <td className="enrollment-action-cell">
+                                                        <button
+                                                            type="button"
+                                                            className="generate-btn"
+                                                            disabled={
+                                                                enrollmentActionId ===
+                                                                request.enrollmentId
+                                                            }
+                                                            onClick={() =>
+                                                                handleEnrollmentDecision(
+                                                                    request.enrollmentId,
+                                                                    "approve"
+                                                                )
+                                                            }
+                                                        >
+                                                            Approve
+                                                        </button>
+
+                                                        {" "}
+
+                                                        <button
+                                                            type="button"
+                                                            className="delete-btn"
+                                                            disabled={
+                                                                enrollmentActionId ===
+                                                                request.enrollmentId
+                                                            }
+                                                            onClick={() =>
+                                                                handleEnrollmentDecision(
+                                                                    request.enrollmentId,
+                                                                    "reject"
+                                                                )
+                                                            }
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="course-table-card" style={{ marginTop: "24px" }}>
+                                <h3>Session Attendance Summary</h3>
+
+                                {sessionAttendanceSummaries.length === 0 ? (
+                                    <p>No attendance sessions found.</p>
+                                ) : (
+                                    <div className="table-wrapper">
+                                        <table>
+                                            <thead>
+                                            <tr>
+                                                <th>Session</th>
+                                                <th>Course</th>
+                                                <th>Expires At</th>
+                                                <th>Total Students Enrolled</th>
+                                                <th>Attendance Count</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {sessionAttendanceSummaries.map((session) => (
+                                                <tr key={session.sessionId}>
+                                                    <td>
+                                                        {session.sessionTitle || "Untitled Session"}
+                                                    </td>
+                                                    <td>{session.courseName || "—"}</td>
+                                                    <td>
+                                                        {session.expiresAt
+                                                            ? new Date(session.expiresAt).toLocaleString()
+                                                            : "—"}
+                                                    </td>
+                                                    <td>{session.totalStudentsEnrolled ?? 0}</td>
+                                                    <td>{session.attendanceCount ?? 0}</td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="course-table-card" style={{ marginTop: "24px" }}>
+                                <h3>Student Attendance Reports</h3>
+                                <div className="user-toolbar" style={{ margin: "16px 0" }}>
+                                    <input
+                                        type="text"
+                                        placeholder="Search student by username..."
+                                        value={attendanceSearch}
+                                        onChange={(e) => setAttendanceSearch(e.target.value)}
+                                    />
+
+                                    <span className="user-count">
+        {filteredAttendanceStudents.length} student
+                                        {filteredAttendanceStudents.length !== 1 ? "s" : ""}
+    </span>
+                                </div>
+                                {filteredAttendanceStudents.length === 0 ? (
+                                    <p>No student attendance records found.</p>
+                                ) : (
+                                    <div className="table-wrapper">
+                                        <table>
+                                            <thead>
+                                            <tr>
+                                                <th>Username</th>
+                                                <th>Sessions Attended</th>
+                                                <th>Attendance History</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            {filteredAttendanceStudents.map((student) => (
+                                                <tr key={student.username}>
+                                                    <td>{student.username || "—"}</td>
+                                                    <td>
+                                                        {student.totalSessionsAttended ?? 0}
+                                                    </td>
+                                                    <td>
+                                                        {Array.isArray(student.attendanceHistory) &&
+                                                        student.attendanceHistory.length > 0 ? (
+                                                            <ul style={{ margin: 0, paddingLeft: "18px" }}>
+                                                                {student.attendanceHistory.map((record) => (
+                                                                    <li key={record.attendanceId}>
+                                                                        <strong>
+                                                                            {record.sessionTitle || "Session"}
+                                                                        </strong>
+                                                                        {" — "}
+                                                                        {record.submittedAt
+                                                                            ? new Date(record.submittedAt).toLocaleString()
+                                                                            : "Date unavailable"}
+                                                                        {record.feedback
+                                                                            ? ` — ${record.feedback}`
+                                                                            : ""}
+                                                                    </li>
+                                                                ))}
+                                                            </ul>
+                                                        ) : (
+                                                            "No attendance history"
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </section>
+
+                {/* =========================
                     COURSE MANAGEMENT
                 ========================= */}
 
@@ -1012,8 +1539,7 @@ function Admin() {
 
                                     <tbody>
 
-                                    {courseSummary.map(
-                                        (course) => {
+                                    {paginatedCourses.map((course) => {
 
                                             const reviewCount =
                                                 Number(
@@ -1104,6 +1630,44 @@ function Admin() {
                                     </tbody>
 
                                 </table>
+                            )}
+
+                            {!loading && courseSummary.length > 0 && (
+                                <div className="review-pagination">
+        <span>
+            Showing {(currentCoursePage - 1) * coursesPerPage + 1}–
+            {Math.min(
+                currentCoursePage * coursesPerPage,
+                courseSummary.length
+            )} of {courseSummary.length} courses
+        </span>
+
+                                    <div className="review-page-buttons">
+                                        <button
+                                            type="button"
+                                            disabled={currentCoursePage === 1}
+                                            onClick={() =>
+                                                setCurrentCoursePage((page) => page - 1)
+                                            }
+                                        >
+                                            Previous
+                                        </button>
+
+                                        <span>
+                Page {currentCoursePage} of {Math.max(1, totalCoursePages)}
+            </span>
+
+                                        <button
+                                            type="button"
+                                            disabled={currentCoursePage >= totalCoursePages}
+                                            onClick={() =>
+                                                setCurrentCoursePage((page) => page + 1)
+                                            }
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
                             )}
 
                         </div>
@@ -1218,7 +1782,8 @@ function Admin() {
 
                         ) : (
 
-                            filteredReviews.map(
+                            paginatedReviews.map(
+
                                 (review) => {
 
                                     const rating =
@@ -1305,6 +1870,46 @@ function Admin() {
 
                     </div>
 
+                    {filteredReviews.length > 0 && (
+                        <div className="review-pagination">
+
+
+                            <span>
+            Showing {startReviewIndex + 1}–
+                                {Math.min(
+                                    startReviewIndex + reviewsPerPage,
+                                    filteredReviews.length
+                                )} of {filteredReviews.length} reviews
+        </span>
+
+                            <div className="review-page-buttons">
+                                <button
+                                    type="button"
+                                    disabled={currentReviewPage === 1}
+                                    onClick={() =>
+                                        setCurrentReviewPage((page) => page - 1)
+                                    }
+                                >
+                                    Previous
+                                </button>
+
+                                <span>
+                Page {currentReviewPage} of {totalReviewPages}
+            </span>
+
+                                <button
+                                    type="button"
+                                    disabled={currentReviewPage >= totalReviewPages}
+                                    onClick={() =>
+                                        setCurrentReviewPage((page) => page + 1)
+                                    }
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                 </section>
 
 
@@ -1324,9 +1929,12 @@ function Admin() {
                                 type="text"
                                 placeholder="Search users by username, email or role..."
                                 value={userSearch}
-                                onChange={(e) =>
-                                    setUserSearch(e.target.value)
-                                }
+
+                                onChange={(e) => {
+                                    setUserSearch(e.target.value);
+                                    setCurrentUserPage(1);
+                                }}
+
                             />
 
                             <span className="user-count">
@@ -1374,7 +1982,7 @@ function Admin() {
 
                                         <tbody>
 
-                                        {filteredUsers.map((user) => (
+                                        {paginatedUsers.map((user) => (
 
                                             <tr key={user.userId}>
 
@@ -1423,6 +2031,44 @@ function Admin() {
 
                                 </div>
 
+                            )}
+
+                            {!userLoading && filteredUsers.length > 0 && (
+                                <div className="review-pagination">
+        <span>
+            Showing {(currentUserPage - 1) * usersPerPage + 1}–
+            {Math.min(
+                currentUserPage * usersPerPage,
+                filteredUsers.length
+            )} of {filteredUsers.length} users
+        </span>
+
+                                    <div className="review-page-buttons">
+                                        <button
+                                            type="button"
+                                            disabled={currentUserPage === 1}
+                                            onClick={() =>
+                                                setCurrentUserPage((page) => page - 1)
+                                            }
+                                        >
+                                            Previous
+                                        </button>
+
+                                        <span>
+                Page {currentUserPage} of {Math.max(1, totalUserPages)}
+            </span>
+
+                                        <button
+                                            type="button"
+                                            disabled={currentUserPage >= totalUserPages}
+                                            onClick={() =>
+                                                setCurrentUserPage((page) => page + 1)
+                                            }
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
                             )}
 
                         </div>
@@ -1717,3 +2363,5 @@ function Admin() {
 }
 
 export default Admin;
+
+/*AUN78C_UJP5Z*/

@@ -873,3 +873,85 @@ body.dark .course-btn:hover {
         height: 230px;
     }
 }
+/* Student attendance enrollment */
+
+.enrollment-message {
+    margin: 14px 0;
+    padding: 12px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+.enrollment-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.enrollment-card {
+    padding: 20px;
+    border: 1px solid #e1e8f3;
+    border-radius: 14px;
+    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(31, 45, 61, 0.06);
+}
+
+.enrollment-card h3 {
+    margin: 0 0 8px;
+    color: #172b4d;
+}
+
+.enrollment-card p {
+    margin: 7px 0;
+    color: #64748b;
+}
+
+.enrollment-card button {
+    width: 100%;
+    margin-top: 14px;
+    padding: 11px 14px;
+    border: 0;
+    border-radius: 8px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.enrollment-card button:hover:not(:disabled) {
+    background: #1d4ed8;
+}
+
+.enrollment-card button:disabled {
+    cursor: not-allowed;
+    background: #cbd5e1;
+    color: #475569;
+}
+
+body.dark .enrollment-card {
+    background: #1e293b;
+    border-color: #334155;
+}
+
+body.dark .enrollment-card h3 {
+    color: #f8fafc;
+}
+
+body.dark .enrollment-card p {
+    color: #cbd5e1;
+}
+
+body.dark .enrollment-message {
+    background: #172554;
+    border-color: #1d4ed8;
+    color: #bfdbfe;
+}
+
+body.dark .enrollment-card button:disabled {
+    background: #475569;
+    color: #cbd5e1;
+}

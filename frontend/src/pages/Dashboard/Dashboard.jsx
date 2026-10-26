@@ -5,7 +5,11 @@ import {
     getDashboard,
     getRecentReviews
 } from "../../services/dashboardService";
-
+import {
+    getAvailableAttendanceSessions,
+    getMyEnrollmentRequests,
+    requestSessionEnrollment
+} from "../../services/attendanceService";
 import {
     BookOpen,
     Bot,
@@ -20,10 +24,49 @@ function Dashboard() {
     const [dashboard, setDashboard] = useState(null);
     const [recentReviews, setRecentReviews] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [attendanceSessions, setAttendanceSessions] = useState([]);
+    const [enrollmentRequests, setEnrollmentRequests] = useState([]);
+    const [enrollmentMessage, setEnrollmentMessage] = useState("");
 
+    const loadEnrollmentData = async () => {
+        try {
+            const [sessions, requests] = await Promise.all([
+                getAvailableAttendanceSessions(),
+                getMyEnrollmentRequests()
+            ]);
+
+            setAttendanceSessions(
+                Array.isArray(sessions) ? sessions : []
+            );
+
+            setEnrollmentRequests(
+                Array.isArray(requests) ? requests : []
+            );
+        } catch (error) {
+            console.error("Enrollment loading error:", error);
+        }
+    };
+
+    const requestEnrollment = async (sessionId) => {
+        try {
+            await requestSessionEnrollment(sessionId);
+
+            setEnrollmentMessage(
+                "Enrollment request sent. Wait for admin approval."
+            );
+
+            await loadEnrollmentData();
+        } catch (error) {
+            setEnrollmentMessage(
+                error?.response?.data?.message ||
+                "Unable to send enrollment request."
+            );
+        }
+    };
     useEffect(() => {
         loadDashboard();
         loadRecentReviews();
+        loadEnrollmentData();
     }, []);
 
     const loadDashboard = async () => {
@@ -430,7 +473,7 @@ function Dashboard() {
 
                     ) : (
 
-                        <div className="reviews-list">
+                        <div className="enrollment-grid">
 
                             {recentReviews.map((review, index) => (
 
@@ -572,6 +615,57 @@ function Dashboard() {
 
                     </div>
 
+                </section>
+
+                <section className="recent-reviews-section">
+                    <div className="section-header">
+                        <div>
+                            <h2>Attendance Enrollment</h2>
+                            <p>Request access to an attendance session.</p>
+                        </div>
+                    </div>
+
+                    {enrollmentMessage && (
+                        <p className="enrollment-message">
+                            {enrollmentMessage}
+                        </p>
+                    )}
+
+                    {attendanceSessions.length === 0 ? (
+                        <p>No attendance sessions are available.</p>
+                    ) : (
+                        <div className="enrollment-grid">
+                            {attendanceSessions.map((session) => {
+                                const request = enrollmentRequests.find(
+                                    (item) => item.sessionId === session.sessionId
+                                );
+
+                                return (
+                                    <div className="enrollment-card" key={session.sessionId}>
+                                        <h3>{session.title}</h3>
+
+                                        <p>
+                                            {request
+                                                ? `Status: ${request.status}`
+                                                : "Not enrolled"}
+                                        </p>
+
+                                        <button
+                                            type="button"
+                                            disabled={!!request}
+                                            onClick={() =>
+                                                requestEnrollment(session.sessionId)
+                                            }
+                                        >
+                                            {request
+                                                ? request.status
+                                                : "Request Enrollment"}
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </section>
 
             </div>

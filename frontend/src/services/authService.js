@@ -1,6 +1,5 @@
 import api from "./api";
 
-
 // =========================
 // LOGIN
 // =========================
@@ -29,7 +28,6 @@ export const register = async (username, email, password) => {
 
     return response.data;
 };
-
 
 // =========================
 // LOGOUT

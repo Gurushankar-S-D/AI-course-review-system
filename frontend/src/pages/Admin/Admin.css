@@ -1053,3 +1053,227 @@ body.dark .summary-card li {
         font-size: 12px;
     }
 }
+
+
+/* ================================
+   REVIEW MANAGEMENT PAGINATION
+================================ */
+
+.review-pagination {
+    --pagination-bg: #ffffff;
+    --pagination-border: #e2e8f0;
+    --pagination-text: #1e293b;
+    --pagination-muted: #475569;
+    --pagination-select-bg: #f8fafc;
+    --pagination-select-border: #cbd5e1;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 24px;
+    padding: 16px 20px;
+    border-radius: 12px;
+    background: var(--pagination-bg);
+    border: 1px solid var(--pagination-border);
+    color: var(--pagination-text);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+    font-size: 15px;
+}
+
+/* Dark theme */
+.dark-mode .review-pagination,
+[data-theme="dark"] .review-pagination,
+body.dark .review-pagination {
+    --pagination-bg: #1e293b;
+    --pagination-border: #334155;
+    --pagination-text: #f1f5f9;
+    --pagination-muted: #cbd5e1;
+    --pagination-select-bg: #0f172a;
+    --pagination-select-border: #475569;
+}
+
+/* Page navigation */
+.review-page-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--pagination-text);
+}
+
+.review-page-buttons button {
+    padding: 9px 16px;
+    border: 1px solid #4f46e5;
+    border-radius: 8px;
+    background: #4f46e5;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.review-page-buttons button:hover:not(:disabled) {
+    background: #4338ca;
+    border-color: #4338ca;
+}
+
+.review-page-buttons button:disabled {
+    background: #94a3b8;
+    border-color: #94a3b8;
+    color: #ffffff;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Responsive layout */
+@media (max-width: 600px) {
+    .review-pagination {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .review-page-buttons {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}
+/* Attendance session creation */
+
+.attendance-session-form {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(200px, 1fr) auto;
+    gap: 16px;
+    align-items: end;
+    margin-top: 16px;
+}
+
+.attendance-session-form div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.attendance-session-form label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #344767;
+}
+
+.attendance-session-form input,
+.attendance-session-form select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d6e0f0;
+    border-radius: 8px;
+    outline: none;
+    background: #ffffff;
+    color: #1f2d3d;
+    font-size: 14px;
+}
+
+.attendance-session-form input:focus,
+.attendance-session-form select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.session-code-card {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid #86efac;
+    border-radius: 10px;
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.session-code-card p {
+    margin: 8px 0 0;
+}
+
+.session-code {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 6px;
+    background: #dcfce7;
+    color: #14532d;
+    font-family: monospace;
+    font-size: 16px;
+    letter-spacing: 1px;
+}
+
+/* Enrollment approval table */
+
+.enrollment-action-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.enrollment-action-cell .generate-btn,
+.enrollment-action-cell .delete-btn {
+    min-width: 82px;
+    margin: 0;
+}
+
+.enrollment-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.enrollment-status.pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.enrollment-status.approved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.enrollment-status.rejected {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+@media (max-width: 760px) {
+    .attendance-session-form {
+        grid-template-columns: 1fr;
+    }
+
+    .attendance-session-form .generate-btn {
+        width: 100%;
+    }
+
+    .enrollment-action-cell {
+        min-width: 180px;
+    }
+}
+body.dark .attendance-session-form label {
+    color: #e2e8f0;
+}
+
+body.dark .attendance-session-form input,
+body.dark .attendance-session-form select {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f8fafc;
+}
+
+body.dark .session-code-card {
+    background: #143322;
+    border-color: #22c55e;
+    color: #bbf7d0;
+}
+
+body.dark .session-code {
+    background: #14532d;
+    color: #dcfce7;
+}
